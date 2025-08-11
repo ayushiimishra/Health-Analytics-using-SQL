@@ -52,7 +52,7 @@ For users with blood pressure measurements:
 ## Solutions  
 
 <details>
-<summary><strong>1. Unique Users in the Logs</strong></summary>
+
 
 ```sql
 SELECT COUNT(DISTINCT id) AS unique_users

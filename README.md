@@ -25,7 +25,7 @@ The main focus of this study is the `user_logs` table.
 
 ## Sneak Peek at the Data  
 
-(A preview image of data here if needed)  
+*(Add preview image of data here if needed)*  
 
 ---
 
@@ -51,62 +51,86 @@ For users with blood pressure measurements:
 
 ## Solutions  
 
--- 1. Unique users in the logs
+<details>
+<summary><strong>1. Unique Users in the Logs</strong></summary>
+
+```sql
 SELECT COUNT(DISTINCT id) AS unique_users
 FROM user_logs;
-
--- 2 to 8: Prepare temporary table
+</details> <details> <summary><strong>2. Prepare Temporary Table</strong></summary>
+sql
+Copy
+Edit
 DROP TABLE IF EXISTS user_measure_count;
 
 SELECT
-id,
-COUNT(*) AS measure_count,
-COUNT(DISTINCT measure) AS unique_measures
+    id,
+    COUNT(*) AS measure_count,
+    COUNT(DISTINCT measure) AS unique_measures
 INTO user_measure_count
 FROM user_logs
 GROUP BY id;
-
--- 2. Average measurements per user
-SELECT ROUND(AVG(measure_count),2) AS avg_measurements
+</details> <details> <summary><strong>3. Average Measurements per User</strong></summary>
+sql
+Copy
+Edit
+SELECT ROUND(AVG(measure_count), 2) AS avg_measurements
 FROM user_measure_count;
-
--- 3. Median measurements per user
+</details> <details> <summary><strong>4. Median Measurements per User</strong></summary>
+sql
+Copy
+Edit
 SELECT DISTINCT
-PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY measure_count) OVER () AS median_measurement
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY measure_count) OVER () AS median_measurement
 FROM user_measure_count;
-
--- 4. Users with 3 or more measurements
+</details> <details> <summary><strong>5. Users with 3 or More Measurements</strong></summary>
+sql
+Copy
+Edit
 SELECT COUNT(id) AS count_records
 FROM user_measure_count
 WHERE measure_count >= 3;
-
--- 5. Users with 1,000 or more measurements
+</details> <details> <summary><strong>6. Users with 1,000 or More Measurements</strong></summary>
+sql
+Copy
+Edit
 SELECT COUNT(id) AS count_records
 FROM user_measure_count
 WHERE measure_count >= 1000;
-
--- 6. Users who logged blood glucose measurements
+</details> <details> <summary><strong>7. Users Who Logged Blood Glucose Measurements</strong></summary>
+sql
+Copy
+Edit
 WITH active_users AS (
-SELECT measure, COUNT(DISTINCT id) AS active_users,
-ROUND(100 * CAST(COUNT(DISTINCT id) AS NUMERIC) / SUM(COUNT(DISTINCT id)) OVER(), 2) AS perc_active_users
-FROM user_logs
-GROUP BY measure
+    SELECT measure,
+           COUNT(DISTINCT id) AS active_users,
+           ROUND(100 * CAST(COUNT(DISTINCT id) AS NUMERIC) / SUM(COUNT(DISTINCT id)) OVER(), 2) AS perc_active_users
+    FROM user_logs
+    GROUP BY measure
 )
-SELECT measure, active_users, CONCAT(SUBSTRING(CAST(perc_active_users AS nvarchar), 1, 5), '%') AS perc_active_users
+SELECT measure,
+       active_users,
+       CONCAT(SUBSTRING(CAST(perc_active_users AS nvarchar), 1, 5), '%') AS perc_active_users
 FROM active_users
 WHERE measure = 'blood_glucose';
-
--- 7. Users with at least 2 types of measurements
+</details> <details> <summary><strong>8. Users with at Least 2 Types of Measurements</strong></summary>
+sql
+Copy
+Edit
 SELECT COUNT(*) AS Count
 FROM user_measure_count
 WHERE unique_measures >= 2;
-
--- 8. Users with all 3 measures
+</details> <details> <summary><strong>9. Users with All 3 Measures</strong></summary>
+sql
+Copy
+Edit
 SELECT COUNT(*) AS Count
 FROM user_measure_count
 WHERE unique_measures = 3;
-
--- 9. Median systolic and diastolic blood pressure values
+</details> <details> <summary><strong>10. Median Systolic and Diastolic Blood Pressure Values</strong></summary>
+sql
+Copy
+Edit
 SELECT DISTINCT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY CAST(systolic AS INT)) OVER() AS systolic_median
 FROM user_logs
 WHERE measure = 'blood_pressure';
@@ -114,6 +138,4 @@ WHERE measure = 'blood_pressure';
 SELECT DISTINCT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY CAST(diastolic AS INT)) OVER() AS diastolic_median
 FROM user_logs
 WHERE measure = 'blood_pressure';
-
-text
-undefined
+</details> ```
